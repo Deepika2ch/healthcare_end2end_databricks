@@ -1,0 +1,254 @@
+{
+  "__locations": {
+    "files": [
+      "databricks.yml",
+      "resources/job.yml"
+    ],
+    "locations": {
+      "bundle": [
+        [
+          0,
+          2,
+          3
+        ]
+      ],
+      "include": [
+        [
+          0,
+          5,
+          3
+        ]
+      ],
+      "resources": [
+        [
+          1,
+          2,
+          3
+        ]
+      ],
+      "resources.jobs": [
+        [
+          1,
+          3,
+          5
+        ]
+      ],
+      "resources.jobs.end_to_end_healthcare_project_job": [
+        [
+          1,
+          4,
+          7
+        ]
+      ],
+      "resources.jobs.end_to_end_healthcare_project_job.tasks": [
+        [
+          1,
+          6,
+          9
+        ]
+      ],
+      "resources.jobs.end_to_end_healthcare_project_job.tasks[0]": [
+        [
+          1,
+          6,
+          11
+        ]
+      ],
+      "resources.jobs.end_to_end_healthcare_project_job.tasks[1]": [
+        [
+          1,
+          11,
+          11
+        ]
+      ],
+      "resources.jobs.end_to_end_healthcare_project_job.tasks[2]": [
+        [
+          1,
+          18,
+          11
+        ]
+      ],
+      "resources.jobs.end_to_end_healthcare_project_job.tasks[3]": [
+        [
+          1,
+          23,
+          11
+        ]
+      ],
+      "resources.jobs.end_to_end_healthcare_project_job.tasks[4]": [
+        [
+          1,
+          30,
+          11
+        ]
+      ],
+      "resources.jobs.end_to_end_healthcare_project_job.tasks[5]": [
+        [
+          1,
+          35,
+          11
+        ]
+      ],
+      "resources.jobs.end_to_end_healthcare_project_job.tasks[6]": [
+        [
+          1,
+          42,
+          11
+        ]
+      ],
+      "resources.jobs.end_to_end_healthcare_project_job.tasks[7]": [
+        [
+          1,
+          47,
+          11
+        ]
+      ],
+      "resources.jobs.end_to_end_healthcare_project_job.tasks[8]": [
+        [
+          1,
+          57,
+          11
+        ]
+      ],
+      "targets": [
+        [
+          0,
+          8,
+          3
+        ]
+      ]
+    },
+    "version": 1
+  },
+  "bundle": {
+    "name": "healthcare-end-to-end-project"
+  },
+  "include": [
+    "resources/job.yml"
+  ],
+  "resources": {
+    "jobs": {
+      "end_to_end_healthcare_project_job": {
+        "name": "end-to-end-healthcare-project-job-updated",
+        "performance_target": "PERFORMANCE_OPTIMIZED",
+        "queue": {
+          "enabled": true
+        },
+        "tasks": [
+          {
+            "notebook_task": {
+              "notebook_path": "../bronze/diagnosis_raw_data_ingestion.ipynb",
+              "source": "WORKSPACE"
+            },
+            "task_key": "diagnosis_raw_ingestion_task"
+          },
+          {
+            "depends_on": [
+              {
+                "task_key": "diagnosis_raw_ingestion_task"
+              }
+            ],
+            "notebook_task": {
+              "notebook_path": "../silver/dim_diagnosis_ingestion.ipynb",
+              "source": "WORKSPACE"
+            },
+            "task_key": "dim_diagnosis_ingestion"
+          },
+          {
+            "notebook_task": {
+              "notebook_path": "../bronze/hospitals_raw_data_ingestion.ipynb",
+              "source": "WORKSPACE"
+            },
+            "task_key": "hospitals_raw_ingestion_task"
+          },
+          {
+            "depends_on": [
+              {
+                "task_key": "hospitals_raw_ingestion_task"
+              }
+            ],
+            "notebook_task": {
+              "notebook_path": "../silver/dim_hospital_ingestion.ipynb",
+              "source": "WORKSPACE"
+            },
+            "task_key": "dim_hospital_ingestion"
+          },
+          {
+            "notebook_task": {
+              "notebook_path": "../bronze/patients_raw_data_ingestion.ipynb",
+              "source": "WORKSPACE"
+            },
+            "task_key": "patients_raw_ingestion_task"
+          },
+          {
+            "depends_on": [
+              {
+                "task_key": "patients_raw_ingestion_task"
+              }
+            ],
+            "notebook_task": {
+              "notebook_path": "../silver/dim_patient_ingestion.ipynb",
+              "source": "WORKSPACE"
+            },
+            "task_key": "dim_patient_ingestion"
+          },
+          {
+            "notebook_task": {
+              "notebook_path": "../bronze/visits_raw_data_ingestion.ipynb",
+              "source": "WORKSPACE"
+            },
+            "task_key": "visits_raw_ingestion_task"
+          },
+          {
+            "depends_on": [
+              {
+                "task_key": "dim_patient_ingestion"
+              },
+              {
+                "task_key": "dim_hospital_ingestion"
+              },
+              {
+                "task_key": "dim_diagnosis_ingestion"
+              },
+              {
+                "task_key": "visits_raw_ingestion_task"
+              }
+            ],
+            "notebook_task": {
+              "notebook_path": "../silver/fact_visit_ingestion.ipynb",
+              "source": "WORKSPACE"
+            },
+            "task_key": "fact_visit_ingestion"
+          },
+          {
+            "depends_on": [
+              {
+                "task_key": "fact_visit_ingestion"
+              }
+            ],
+            "notebook_task": {
+              "notebook_path": "../gold/resubmission_analysis.ipynb",
+              "source": "WORKSPACE"
+            },
+            "task_key": "resubmission_analysis"
+          }
+        ]
+      }
+    }
+  },
+  "targets": {
+    "dev": {
+      "mode": "development",
+      "workspace": {
+        "host": "https://adb-7405607317963710.10.azuredatabricks.net"
+      }
+    },
+    "prod": {
+      "mode": "production",
+      "workspace": {
+        "host": "https://adb-7405607317963710.10.azuredatabricks.net",
+        "root_path": "/Workspace/.bundle/${bundle.name}/${bundle.target}"
+      }
+    }
+  }
+}
